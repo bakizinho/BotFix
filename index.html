@@ -1,0 +1,1480 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>BotFix</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: #080b10;
+      color: #fff;
+      font-family: Arial, sans-serif;
+      min-height: 100vh;
+      padding: 25px 20px;
+    }
+
+    .app {
+      max-width: 500px;
+      margin: auto;
+    }
+
+    .logo {
+      text-align: center;
+      margin: 25px 0 40px;
+    }
+
+    .logo-icon {
+      font-size: 55px;
+    }
+
+    .logo h1 {
+      color: #00aaff;
+      font-size: 36px;
+      margin-top: 8px;
+    }
+
+    .logo p,
+    .texto {
+      color: #8b949e;
+    }
+
+    h2 {
+      text-align: center;
+      font-size: 22px;
+      margin-bottom: 20px;
+    }
+
+    textarea {
+      width: 100%;
+      height: 190px;
+      background: #111720;
+      color: #fff;
+      border: 1px solid #263241;
+      border-radius: 16px;
+      padding: 18px;
+      font-size: 15px;
+      resize: none;
+      outline: none;
+    }
+
+    textarea:focus {
+      border-color: #00aaff;
+      box-shadow: 0 0 12px #00aaff33;
+    }
+
+    button {
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .botao {
+      width: 100%;
+      margin-top: 15px;
+      padding: 17px;
+      border: none;
+      border-radius: 14px;
+      background: #009dff;
+      color: #fff;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .botao:active {
+      transform: scale(0.98);
+    }
+
+    .botao-copiado {
+      background: #168a4a;
+    }
+
+    .secundario {
+      background: #202936;
+    }
+
+    .opcoes {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 20px;
+    }
+
+    .card {
+      background: #111720;
+      border: 1px solid #263241;
+      border-radius: 15px;
+      padding: 18px;
+      text-align: center;
+    }
+
+    .card + .card {
+      margin-top: 15px;
+    }
+
+    .opcoes .card {
+      margin-top: 0;
+    }
+
+    .opcao {
+      cursor: pointer;
+    }
+
+    .opcao:active {
+      transform: scale(0.97);
+    }
+
+    .icone {
+      display: block;
+      font-size: 26px;
+      margin-bottom: 9px;
+    }
+
+    .texto {
+      line-height: 1.5;
+      margin-top: 10px;
+    }
+
+    small {
+      display: block;
+      color: #65717f;
+      margin-top: 5px;
+    }
+
+    .codigo {
+      margin-top: 15px;
+      padding: 15px;
+      background: #080b10;
+      border-radius: 10px;
+      color: #00aaff;
+      font-family: monospace;
+      overflow-wrap: anywhere;
+      white-space: pre-wrap;
+      text-align: left;
+    }
+
+    .linha-erro {
+      color: #ff6b6b;
+      border-left: 3px solid #ff6b6b;
+    }
+
+    .correcao {
+      color: #4ade80;
+      border-left: 3px solid #168a4a;
+    }
+
+    .arquivo-info {
+      background: #0d2433;
+      border: 1px solid #075985;
+    }
+
+    .sucesso {
+      background: #0d2b1b;
+      border: 1px solid #168a4a;
+    }
+
+    .mensagem {
+      position: fixed;
+      left: 20px;
+      right: 20px;
+      bottom: 25px;
+      max-width: 460px;
+      margin: auto;
+      padding: 15px;
+      border-radius: 13px;
+      background: #202936;
+      color: #fff;
+      text-align: center;
+      font-weight: bold;
+      box-shadow: 0 8px 30px #00000080;
+      z-index: 999;
+      animation: aparecer 0.25s ease;
+    }
+
+    @keyframes aparecer {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .carregando {
+      text-align: center;
+      padding-top: 80px;
+    }
+
+    .loader {
+      width: 55px;
+      height: 55px;
+      border: 5px solid #202936;
+      border-top-color: #00aaff;
+      border-radius: 50%;
+      margin: 25px auto;
+      animation: girar 0.8s linear infinite;
+    }
+
+    @keyframes girar {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .recentes {
+      margin-top: 35px;
+    }
+
+    .titulo-historico {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+
+    .titulo-historico h3 {
+      color: #8b949e;
+      font-size: 13px;
+      letter-spacing: 1px;
+    }
+
+    .limpar {
+      background: transparent;
+      color: #ff6b6b;
+      border: none;
+      font-size: 13px;
+      cursor: pointer;
+    }
+
+    .historico-item {
+      width: 100%;
+      background: #111720;
+      border: 1px solid #263241;
+      border-radius: 14px;
+      padding: 15px;
+      color: #fff;
+      text-align: left;
+      margin-bottom: 10px;
+      cursor: pointer;
+    }
+
+    .historico-item strong {
+      display: block;
+      margin-bottom: 7px;
+    }
+
+    .historico-item p {
+      color: #8b949e;
+      font-size: 13px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .historico-item small {
+      color: #56606c;
+      margin-top: 8px;
+    }
+
+    .vazio {
+      text-align: center;
+      color: #56606c;
+      padding: 30px;
+    }
+
+    #seletorArquivo {
+      display: none;
+    }
+  </style>
+</head>
+
+<body>
+
+  <main class="app">
+
+    <header class="logo">
+      <div class="logo-icon">🤖🔧</div>
+      <h1>BotFix</h1>
+      <p>Seu erro. Nossa solução.</p>
+    </header>
+
+    <section id="inicio">
+
+      <h2>Qual erro você está enfrentando?</h2>
+
+      <textarea
+        id="erro"
+        placeholder="Cole aqui o erro que apareceu no Termux ou terminal..."
+      ></textarea>
+
+      <button class="botao" onclick="analisarErro()">
+        🔍 ANALISAR ERRO
+      </button>
+
+      <input
+        type="file"
+        id="seletorArquivo"
+        accept=".js,.json,.py,.txt"
+        onchange="receberArquivo(event)"
+      >
+
+      <section class="opcoes">
+
+        <div class="card">
+          <span class="icone">📸</span>
+          Enviar print
+          <small>Em breve</small>
+        </div>
+
+        <div
+          class="card opcao"
+          onclick="selecionarArquivo()"
+        >
+          <span class="icone">📁</span>
+          Enviar arquivo
+          <small>JS • JSON • PY • TXT</small>
+        </div>
+
+        <div class="card">
+          <span class="icone">🤖</span>
+          Falar com a IA
+          <small>Em breve</small>
+        </div>
+
+        <div class="card">
+          <span class="icone">🛡️</span>
+          Proteção
+          <small>Ativa</small>
+        </div>
+
+      </section>
+
+      <section class="recentes">
+
+        <div class="titulo-historico">
+
+          <h3>ERROS RECENTES</h3>
+
+          <button
+            id="botaoLimpar"
+            class="limpar"
+            onclick="limparHistorico()"
+            style="display:none;"
+          >
+            APAGAR
+          </button>
+
+        </div>
+
+        <div id="listaHistorico"></div>
+
+      </section>
+
+    </section>
+
+    <section id="carregando" style="display:none;">
+
+      <div class="carregando">
+
+        <div class="loader"></div>
+
+        <h2 id="tituloCarregando">
+          Analisando...
+        </h2>
+
+        <p class="texto" id="textoCarregando">
+          O BotFix está verificando o problema.
+        </p>
+
+      </div>
+
+    </section>
+
+    <section id="resultado" style="display:none;"></section>
+
+  </main>
+
+  <div id="areaMensagem"></div>
+
+  <script>
+    let comandoAtual = "";
+
+    function escaparHTML(texto) {
+      return String(texto)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function mostrarMensagem(texto) {
+      const area =
+        document.getElementById("areaMensagem");
+
+      area.innerHTML = `
+        <div class="mensagem">
+          ${escaparHTML(texto)}
+        </div>
+      `;
+
+      setTimeout(function () {
+        area.innerHTML = "";
+      }, 2200);
+    }
+
+    function mostrarCarregamento(titulo, texto) {
+      document.getElementById("inicio").style.display =
+        "none";
+
+      document.getElementById("resultado").style.display =
+        "none";
+
+      document.getElementById("tituloCarregando").textContent =
+        titulo;
+
+      document.getElementById("textoCarregando").textContent =
+        texto;
+
+      document.getElementById("carregando").style.display =
+        "block";
+    }
+
+    function analisarErro() {
+      const erro = document
+        .getElementById("erro")
+        .value
+        .trim();
+
+      if (erro === "") {
+        mostrarMensagem(
+          "⚠️ Cole um erro antes de analisar."
+        );
+
+        return;
+      }
+
+      mostrarCarregamento(
+        "Analisando seu erro...",
+        "O BotFix está procurando a causa do problema."
+      );
+
+      setTimeout(function () {
+        processarErro(erro, true);
+      }, 1300);
+    }
+
+    function processarErro(erro, salvar) {
+      let titulo = "Erro ainda não reconhecido";
+
+      let explicacao =
+        "O BotFix não conseguiu identificar automaticamente este erro.";
+
+      let causa =
+        "A mensagem pode precisar de uma análise mais detalhada.";
+
+      let solucao =
+        "Envie a mensagem completa para uma análise melhor.";
+
+      let comando =
+        "Nenhum comando recomendado";
+
+      const minusculo = erro.toLowerCase();
+
+      if (
+        erro.includes("Cannot find module") ||
+        erro.includes("MODULE_NOT_FOUND")
+      ) {
+        titulo = "Módulo não encontrado";
+
+        explicacao =
+          "O projeto tentou carregar um módulo que não foi encontrado.";
+
+        causa =
+          "A dependência pode não estar instalada ou o nome está incorreto.";
+
+        const modulo = erro.match(
+          /Cannot find module ['"](.+?)['"]/
+        );
+
+        if (
+          modulo &&
+          !modulo[1].startsWith(".")
+        ) {
+          const nome = modulo[1];
+
+          solucao =
+            "A dependência " +
+            nome +
+            " pode não estar instalada.";
+
+          comando =
+            "npm install " + nome;
+        }
+      }
+
+      else if (
+        erro.includes("SyntaxError") ||
+        erro.includes("Unexpected token")
+      ) {
+        titulo = "Erro de sintaxe";
+
+        explicacao =
+          "O programa encontrou uma parte inválida no código.";
+
+        causa =
+          "Pode existir uma chave, vírgula ou parêntese incorreto.";
+
+        solucao =
+          "Revise a linha indicada no erro e as linhas próximas.";
+      }
+
+      else if (
+        erro.includes("EADDRINUSE")
+      ) {
+        titulo = "Porta já está em uso";
+
+        explicacao =
+          "Outro processo já está usando a porta.";
+
+        causa =
+          "O servidor pode já estar rodando.";
+
+        solucao =
+          "Encerre o processo antigo ou altere a porta.";
+
+        comando = "pkill node";
+      }
+
+      else if (
+        minusculo.includes("permission denied")
+      ) {
+        titulo = "Permissão negada";
+
+        explicacao =
+          "O sistema bloqueou o acesso ou execução.";
+
+        causa =
+          "O arquivo pode não possuir a permissão necessária.";
+
+        solucao =
+          "Identifique o arquivo antes de alterar permissões.";
+      }
+
+      else if (
+        minusculo.includes("command not found")
+      ) {
+        titulo = "Comando não encontrado";
+
+        explicacao =
+          "O terminal não reconheceu o comando.";
+
+        causa =
+          "O programa pode não estar instalado.";
+
+        solucao =
+          "Confira o nome do comando e o programa necessário.";
+      }
+
+      else if (
+        erro.includes("ENOENT")
+      ) {
+        titulo =
+          "Arquivo ou pasta não encontrado";
+
+        explicacao =
+          "O programa tentou acessar um caminho inexistente.";
+
+        causa =
+          "O caminho pode estar incorreto.";
+
+        solucao =
+          "Verifique o caminho mostrado no erro.";
+      }
+
+      else if (
+        erro.includes("ECONNREFUSED")
+      ) {
+        titulo = "Conexão recusada";
+
+        explicacao =
+          "A conexão com um serviço foi recusada.";
+
+        causa =
+          "O servidor pode estar desligado ou a porta incorreta.";
+
+        solucao =
+          "Verifique o serviço, endereço e porta.";
+      }
+
+      const analise = {
+        tipo: "erro",
+        erro: erro,
+        titulo: titulo,
+        explicacao: explicacao,
+        causa: causa,
+        solucao: solucao,
+        comando: comando,
+        data: new Date().toLocaleString("pt-BR")
+      };
+
+      if (salvar) {
+        salvarHistorico(analise);
+      }
+
+      mostrarResultadoErro(analise);
+    }
+
+    function selecionarArquivo() {
+      document
+        .getElementById("seletorArquivo")
+        .click();
+    }
+
+    function receberArquivo(evento) {
+      const arquivo = evento.target.files[0];
+
+      if (!arquivo) {
+        return;
+      }
+
+      const extensao =
+        arquivo.name
+          .split(".")
+          .pop()
+          .toLowerCase();
+
+      const permitidos = [
+        "js",
+        "json",
+        "py",
+        "txt"
+      ];
+
+      if (!permitidos.includes(extensao)) {
+        mostrarMensagem(
+          "❌ Arquivo não suportado."
+        );
+
+        evento.target.value = "";
+
+        return;
+      }
+
+      if (arquivo.size > 2 * 1024 * 1024) {
+        mostrarMensagem(
+          "⚠️ O arquivo deve ter no máximo 2 MB."
+        );
+
+        evento.target.value = "";
+
+        return;
+      }
+
+      mostrarCarregamento(
+        "Analisando arquivo...",
+        "O BotFix está verificando o código linha por linha."
+      );
+
+      const leitor = new FileReader();
+
+      leitor.onload = function (e) {
+        const conteudo = e.target.result;
+
+        setTimeout(function () {
+          analisarArquivo(
+            arquivo.name,
+            extensao,
+            conteudo
+          );
+        }, 1400);
+      };
+
+      leitor.onerror = function () {
+        voltarInicio();
+
+        mostrarMensagem(
+          "❌ Não foi possível ler o arquivo."
+        );
+      };
+
+      leitor.readAsText(arquivo);
+
+      evento.target.value = "";
+    }
+
+    function analisarArquivo(nome, extensao, conteudo) {
+      const linhas = conteudo.split(/\r?\n/);
+
+      let problemas = [];
+
+      if (extensao === "json") {
+        problemas =
+          analisarJSON(conteudo, linhas);
+      }
+
+      else if (extensao === "js") {
+        problemas =
+          analisarJavaScript(conteudo, linhas);
+      }
+
+      else if (extensao === "py") {
+        problemas =
+          analisarPython(linhas);
+      }
+
+      else {
+        problemas =
+          analisarTexto(linhas);
+      }
+
+      const analise = {
+        tipo: "arquivo",
+        erro: nome,
+        titulo:
+          problemas.length === 0
+            ? "Nenhum problema óbvio encontrado"
+            : problemas.length +
+              " possível(is) problema(s)",
+        nome: nome,
+        extensao: extensao,
+        totalLinhas: linhas.length,
+        problemas: problemas.slice(0, 20),
+        data: new Date().toLocaleString("pt-BR")
+      };
+
+      salvarHistorico(analise);
+
+      mostrarResultadoArquivo(analise);
+    }
+
+    function analisarJSON(conteudo, linhas) {
+      const problemas = [];
+
+      try {
+        JSON.parse(conteudo);
+      }
+
+      catch (erro) {
+        let posicao = null;
+        let linhaNumero = null;
+        let correcao = null;
+
+        const posicaoEncontrada =
+          erro.message.match(/position\s+(\d+)/i);
+
+        const linhaEncontrada =
+          erro.message.match(/line\s+(\d+)/i);
+
+        if (posicaoEncontrada) {
+          posicao =
+            Number(posicaoEncontrada[1]);
+
+          linhaNumero =
+            conteudo
+              .slice(0, posicao)
+              .split(/\r?\n/)
+              .length;
+        }
+
+        else if (linhaEncontrada) {
+          linhaNumero =
+            Number(linhaEncontrada[1]);
+        }
+
+        if (
+          /Expected ',' or '}'/i.test(erro.message) &&
+          linhaNumero &&
+          linhaNumero > 1
+        ) {
+          const linhaAnterior =
+            linhas[linhaNumero - 2];
+
+          if (
+            linhaAnterior &&
+            !linhaAnterior.trim().endsWith(",")
+          ) {
+            correcao =
+              linhaAnterior.trim() + ",";
+          }
+        }
+
+        problemas.push({
+          linha: linhaNumero || "?",
+          tipo: "JSON inválido",
+          mensagem: erro.message,
+          trecho:
+            linhaNumero
+              ? linhas[linhaNumero - 1] || ""
+              : "Não foi possível identificar a linha exata.",
+          correcao: correcao
+        });
+      }
+
+      return problemas;
+    }
+
+    function analisarJavaScript(conteudo, linhas) {
+      const problemas = [];
+
+      try {
+        new Function(conteudo);
+      }
+
+      catch (erro) {
+        let linhaNumero = null;
+
+        const stack =
+          String(erro.stack || "");
+
+        const encontrado =
+          stack.match(/<anonymous>:(\d+):(\d+)/);
+
+        if (encontrado) {
+          const numero =
+            Number(encontrado[1]) - 2;
+
+          if (
+            numero > 0 &&
+            numero <= linhas.length
+          ) {
+            linhaNumero = numero;
+          }
+        }
+
+        problemas.push({
+          linha: linhaNumero || "?",
+          tipo: "Possível erro de sintaxe",
+          mensagem: erro.message,
+          trecho:
+            linhaNumero
+              ? linhas[linhaNumero - 1] || ""
+              : "O navegador detectou sintaxe inválida.",
+          correcao: null
+        });
+      }
+
+      linhas.forEach(function (linha, indice) {
+        const texto = linha.trim();
+
+        if (
+          texto.includes("console.log(") &&
+          !texto.includes(")")
+        ) {
+          adicionarProblema(
+            problemas,
+            indice + 1,
+            "Parêntese suspeito",
+            "O console.log pode estar sem o parêntese de fechamento.",
+            linha,
+            texto + ")"
+          );
+        }
+
+        if (
+          /\brequire\s*\(\s*['"][^'"]+['"]\s*$/.test(texto)
+        ) {
+          adicionarProblema(
+            problemas,
+            indice + 1,
+            "Require incompleto",
+            "O require parece estar sem o parêntese final.",
+            linha,
+            texto + ")"
+          );
+        }
+      });
+
+      return removerDuplicados(problemas);
+    }
+
+    function analisarPython(linhas) {
+      const problemas = [];
+
+      linhas.forEach(function (linha, indice) {
+        const texto = linha.trim();
+
+        if (
+          /^(if|elif|else|for|while|def|class|try|except|finally|with)\b/.test(texto) &&
+          !texto.endsWith(":") &&
+          !texto.startsWith("#")
+        ) {
+          adicionarProblema(
+            problemas,
+            indice + 1,
+            "Dois-pontos ausente",
+            "Esta estrutura Python normalmente precisa terminar com :",
+            linha,
+            texto + ":"
+          );
+        }
+
+        if (
+          texto.startsWith("print(") &&
+          !texto.includes(")")
+        ) {
+          adicionarProblema(
+            problemas,
+            indice + 1,
+            "Print incompleto",
+            "O print pode estar sem o parêntese de fechamento.",
+            linha,
+            texto + ")"
+          );
+        }
+      });
+
+      return problemas;
+    }
+
+    function analisarTexto(linhas) {
+      const problemas = [];
+
+      linhas.forEach(function (linha, indice) {
+        const minusculo =
+          linha.toLowerCase();
+
+        if (
+          minusculo.includes("error") ||
+          minusculo.includes("erro") ||
+          minusculo.includes("failed") ||
+          minusculo.includes("exception")
+        ) {
+          adicionarProblema(
+            problemas,
+            indice + 1,
+            "Mensagem de erro encontrada",
+            "Esta linha contém uma possível mensagem de erro.",
+            linha,
+            null
+          );
+        }
+      });
+
+      return problemas;
+    }
+
+    function adicionarProblema(
+      lista,
+      linha,
+      tipo,
+      mensagem,
+      trecho,
+      correcao
+    ) {
+      lista.push({
+        linha: linha,
+        tipo: tipo,
+        mensagem: mensagem,
+        trecho: trecho,
+        correcao: correcao || null
+      });
+    }
+
+    function removerDuplicados(lista) {
+      const vistos = new Set();
+
+      return lista.filter(function (item) {
+        const chave =
+          item.linha +
+          "|" +
+          item.tipo +
+          "|" +
+          item.mensagem;
+
+        if (vistos.has(chave)) {
+          return false;
+        }
+
+        vistos.add(chave);
+
+        return true;
+      });
+    }
+
+    function mostrarResultadoArquivo(analise) {
+      document.getElementById("carregando").style.display =
+        "none";
+
+      const resultado =
+        document.getElementById("resultado");
+
+      resultado.style.display = "block";
+
+      const problemas =
+        analise.problemas || [];
+
+      let htmlProblemas = "";
+
+      if (problemas.length === 0) {
+        htmlProblemas = `
+          <div class="card sucesso">
+
+            <span class="icone">✅</span>
+
+            <strong>
+              NENHUM PROBLEMA ÓBVIO
+            </strong>
+
+            <p class="texto">
+              O BotFix não encontrou erros simples
+              que consiga detectar localmente.
+            </p>
+
+            <p class="texto">
+              Isso não garante que o código esteja
+              100% correto.
+            </p>
+
+          </div>
+        `;
+      }
+
+      else {
+        htmlProblemas =
+          problemas
+            .map(function (problema, indice) {
+
+              let areaCorrecao = "";
+
+              if (problema.correcao) {
+                areaCorrecao = `
+                  <p class="texto">
+                    🔧 <strong>CORREÇÃO SUGERIDA</strong>
+                  </p>
+
+                  <div class="codigo correcao">
+                    ${escaparHTML(problema.correcao)}
+                  </div>
+
+                  <button
+                    id="copiarCorrecao${indice}"
+                    class="botao"
+                    onclick="copiarCorrecao(${indice})"
+                  >
+                    📋 COPIAR CORREÇÃO
+                  </button>
+                `;
+              }
+
+              return `
+                <div class="card">
+
+                  <span class="icone">⚠️</span>
+
+                  <strong>
+                    ${escaparHTML(problema.tipo)}
+                  </strong>
+
+                  <p class="texto">
+                    Linha: ${escaparHTML(problema.linha)}
+                  </p>
+
+                  <p class="texto">
+                    ${escaparHTML(problema.mensagem)}
+                  </p>
+
+                  <div class="codigo linha-erro">${escaparHTML(problema.trecho)}</div>
+
+                  ${areaCorrecao}
+
+                </div>
+              `;
+            })
+            .join("");
+      }
+
+      window.problemasAtuais = problemas;
+
+      resultado.innerHTML = `
+        <h2>Análise do arquivo</h2>
+
+        <div class="card arquivo-info">
+
+          <span class="icone">📁</span>
+
+          <strong>
+            ${escaparHTML(analise.nome)}
+          </strong>
+
+          <p class="texto">
+            Tipo: .${escaparHTML(analise.extensao)}
+          </p>
+
+          <p class="texto">
+            ${escaparHTML(analise.totalLinhas)}
+            linhas analisadas
+          </p>
+
+        </div>
+
+        <div class="card">
+
+          <span class="icone">
+            ${problemas.length === 0 ? "✅" : "🔍"}
+          </span>
+
+          <strong>RESULTADO</strong>
+
+          <p class="texto">
+            ${
+              problemas.length === 0
+                ? "Nenhum problema óbvio encontrado."
+                : problemas.length +
+                  " possível(is) problema(s) encontrado(s)."
+            }
+          </p>
+
+        </div>
+
+        ${htmlProblemas}
+
+        <button
+          class="botao secundario"
+          onclick="voltarInicio()"
+        >
+          ← VOLTAR AO BOTFIX
+        </button>
+      `;
+    }
+
+    function copiarCorrecao(indice) {
+      const problema =
+        window.problemasAtuais[indice];
+
+      if (
+        !problema ||
+        !problema.correcao
+      ) {
+        mostrarMensagem(
+          "❌ Correção não encontrada."
+        );
+
+        return;
+      }
+
+      const botao =
+        document.getElementById(
+          "copiarCorrecao" + indice
+        );
+
+      navigator.clipboard
+        .writeText(problema.correcao)
+        .then(function () {
+
+          botao.textContent =
+            "✅ CORREÇÃO COPIADA";
+
+          botao.classList.add(
+            "botao-copiado"
+          );
+
+          setTimeout(function () {
+
+            botao.textContent =
+              "📋 COPIAR CORREÇÃO";
+
+            botao.classList.remove(
+              "botao-copiado"
+            );
+
+          }, 2000);
+        })
+        .catch(function () {
+
+          mostrarMensagem(
+            "❌ Não foi possível copiar."
+          );
+
+        });
+    }
+
+    function salvarHistorico(analise) {
+      let historico;
+
+      try {
+        historico = JSON.parse(
+          localStorage.getItem("botfixHistorico")
+        ) || [];
+      }
+
+      catch {
+        historico = [];
+      }
+
+      historico.unshift(analise);
+
+      historico = historico.slice(0, 5);
+
+      localStorage.setItem(
+        "botfixHistorico",
+        JSON.stringify(historico)
+      );
+    }
+
+    function carregarHistorico() {
+      const lista =
+        document.getElementById("listaHistorico");
+
+      const botaoLimpar =
+        document.getElementById("botaoLimpar");
+
+      let historico;
+
+      try {
+        historico = JSON.parse(
+          localStorage.getItem("botfixHistorico")
+        ) || [];
+      }
+
+      catch {
+        historico = [];
+      }
+
+      if (historico.length === 0) {
+        botaoLimpar.style.display = "none";
+
+        lista.innerHTML = `
+          <div class="vazio">
+            Nenhuma análise realizada.
+          </div>
+        `;
+
+        return;
+      }
+
+      botaoLimpar.style.display = "block";
+
+      lista.innerHTML =
+        historico
+          .map(function (item, indice) {
+
+            const icone =
+              item.tipo === "arquivo"
+                ? "📁"
+                : "❌";
+
+            return `
+              <button
+                class="historico-item"
+                onclick="abrirHistorico(${indice})"
+              >
+
+                <strong>
+                  ${icone}
+                  ${escaparHTML(item.titulo)}
+                </strong>
+
+                <p>
+                  ${escaparHTML(item.erro)}
+                </p>
+
+                <small>
+                  ${escaparHTML(item.data)}
+                </small>
+
+              </button>
+            `;
+          })
+          .join("");
+    }
+
+    function abrirHistorico(indice) {
+      let historico;
+
+      try {
+        historico = JSON.parse(
+          localStorage.getItem("botfixHistorico")
+        ) || [];
+      }
+
+      catch {
+        historico = [];
+      }
+
+      const analise = historico[indice];
+
+      if (!analise) {
+        return;
+      }
+
+      document.getElementById("inicio").style.display =
+        "none";
+
+      if (analise.tipo === "arquivo") {
+        mostrarResultadoArquivo(analise);
+      }
+
+      else {
+        mostrarResultadoErro(analise);
+      }
+    }
+
+    function limparHistorico() {
+      localStorage.removeItem("botfixHistorico");
+
+      carregarHistorico();
+
+      mostrarMensagem(
+        "🗑️ Histórico apagado."
+      );
+    }
+
+    function mostrarResultadoErro(analise) {
+      comandoAtual = analise.comando;
+
+      document.getElementById("carregando").style.display =
+        "none";
+
+      const resultado =
+        document.getElementById("resultado");
+
+      resultado.style.display = "block";
+
+      resultado.innerHTML = `
+        <h2>Resultado da análise</h2>
+
+        <div class="card">
+          <span class="icone">❌</span>
+
+          <strong>ERRO ENCONTRADO</strong>
+
+          <p class="texto">
+            ${escaparHTML(analise.titulo)}
+          </p>
+        </div>
+
+        <div class="card">
+          <span class="icone">📖</span>
+
+          <strong>O QUE ACONTECEU</strong>
+
+          <p class="texto">
+            ${escaparHTML(analise.explicacao)}
+          </p>
+        </div>
+
+        <div class="card">
+          <span class="icone">🔍</span>
+
+          <strong>CAUSA PROVÁVEL</strong>
+
+          <p class="texto">
+            ${escaparHTML(analise.causa)}
+          </p>
+        </div>
+
+        <div class="card">
+          <span class="icone">🔧</span>
+
+          <strong>SOLUÇÃO RECOMENDADA</strong>
+
+          <p class="texto">
+            ${escaparHTML(analise.solucao)}
+          </p>
+        </div>
+
+        <div class="card">
+          <span class="icone">💻</span>
+
+          <strong>
+            COMANDO RECOMENDADO
+          </strong>
+
+          <div class="codigo">${escaparHTML(analise.comando)}</div>
+
+          <button
+            id="botaoCopiar"
+            class="botao"
+            onclick="copiarComando()"
+          >
+            📋 COPIAR COMANDO
+          </button>
+
+        </div>
+
+        <button
+          class="botao secundario"
+          onclick="voltarInicio()"
+        >
+          ← ANALISAR OUTRO ERRO
+        </button>
+      `;
+    }
+
+    function copiarComando() {
+      if (
+        comandoAtual ===
+        "Nenhum comando recomendado"
+      ) {
+        mostrarMensagem(
+          "⚠️ Não existe comando para copiar."
+        );
+
+        return;
+      }
+
+      const botao =
+        document.getElementById("botaoCopiar");
+
+      navigator.clipboard
+        .writeText(comandoAtual)
+        .then(function () {
+
+          botao.textContent =
+            "✅ COMANDO COPIADO";
+
+          botao.classList.add(
+            "botao-copiado"
+          );
+
+          setTimeout(function () {
+
+            botao.textContent =
+              "📋 COPIAR COMANDO";
+
+            botao.classList.remove(
+              "botao-copiado"
+            );
+
+          }, 2000);
+        })
+        .catch(function () {
+
+          mostrarMensagem(
+            "❌ Não foi possível copiar."
+          );
+
+        });
+    }
+
+    function voltarInicio() {
+      document.getElementById("resultado").style.display =
+        "none";
+
+      document.getElementById("carregando").style.display =
+        "none";
+
+      document.getElementById("inicio").style.display =
+        "block";
+
+      document.getElementById("erro").value = "";
+
+      carregarHistorico();
+    }
+
+    carregarHistorico();
+  </script>
+
+</body>
+</html>
