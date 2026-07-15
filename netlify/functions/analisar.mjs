@@ -100,7 +100,7 @@ Tenha cuidado:
 
   }
 
-}o obrigatório:
+}
 
 {
   "titulo": "nome simples do erro",
