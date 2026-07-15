@@ -1,79 +1,106 @@
-export default async function (req) {
-  const headers = {
-    "Content-Type": "application/json"
-  };
+export async function handler(event) {
 
-  if (req.method !== "POST") {
-    return new Response(
-      JSON.stringify({
+  if (event.httpMethod !== "POST") {
+    return {
+      statusCode: 405,
+      body: JSON.stringify({
         erro: "Método não permitido"
-      }),
-      {
-        status: 405,
-        headers
-      }
-    );
+      })
+    };
   }
 
   try {
-    const corpo = await req.json();
-    const erroUsuario = corpo.erro;
 
-    if (
-      !erroUsuario ||
-      !String(erroUsuario).trim()
-    ) {
-      return new Response(
-        JSON.stringify({
-          erro: "Envie um erro para análise."
-        }),
-        {
-          status: 400,
-          headers
-        }
-      );
-    }
+    const { mensagem } = JSON.parse(event.body);
 
-    const chave = process.env.OPENAI_API_KEY;
-
-    if (!chave) {
-      return new Response(
-        JSON.stringify({
-          erro: "Chave da IA não configurada."
-        }),
-        {
-          status: 500,
-          headers
-        }
-      );
-    }
 
     const resposta = await fetch(
       "https://api.openai.com/v1/responses",
       {
         method: "POST",
+
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${chave}`
+          "Authorization":
+          `Bearer ${process.env.OPENAI_API_KEY}`
         },
+
         body: JSON.stringify({
+
           model: "gpt-4.1-mini",
+
           input: `
-Você é a inteligência artificial do aplicativo BotFix.
+Você é o BotFix AI, um programador especialista.
 
-Sua função é analisar erros de programação,
-JavaScript, Node.js, JSON, Python, Termux
-e bots de WhatsApp.
+Ajude usuários que criam bots, sites e códigos.
 
-Explique tudo em português brasileiro simples.
+Analise o problema:
 
-ERRO DO USUÁRIO:
+${mensagem}
 
-${erroUsuario}
-
-Responda SOMENTE com JSON válido.
+Responda sempre em português brasileiro.
 
 Formato obrigatório:
+
+TÍTULO:
+(nome do problema)
+
+EXPLICAÇÃO:
+(o que aconteceu)
+
+CAUSA:
+(por que aconteceu)
+
+SOLUÇÃO:
+(passos para corrigir)
+
+CÓDIGO:
+(se precisar, gere o código completo)
+
+COMANDO:
+(comando para executar no terminal)
+
+Tenha cuidado:
+- Não mande comandos perigosos sem explicar.
+- Não apague arquivos sem confirmação.
+`
+        })
+      }
+    );
+
+
+    const dados = await resposta.json();
+
+
+    return {
+      statusCode: 200,
+
+      body: JSON.stringify({
+
+        resposta:
+        dados.output_text || "Sem resposta"
+
+      })
+    };
+
+
+  } catch (erro) {
+
+    return {
+
+      statusCode:500,
+
+      body:JSON.stringify({
+
+        erro:"Erro interno da IA"
+
+      })
+
+    };
+
+  }
+
+}o obrigatório:
 
 {
   "titulo": "nome simples do erro",
